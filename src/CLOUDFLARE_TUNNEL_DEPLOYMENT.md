@@ -7,6 +7,7 @@
 ## Why Cloudflare Tunnel?
 
 ### Problems with Traditional Port Forwarding:
+
 - ❌ Security risk (exposing ports to internet)
 - ❌ CGNAT issues (many ISPs don't give you public IP)
 - ❌ Dynamic IP changes
@@ -15,6 +16,7 @@
 - ❌ Manual SSL certificate management
 
 ### Cloudflare Tunnel Benefits:
+
 - ✅ **No ports open** - Outbound connection only
 - ✅ **Works behind CGNAT** - No public IP needed
 - ✅ **Free tier** - Up to 50 users for free
@@ -50,8 +52,7 @@ Your App on Raspberry Pi
 
 1. **Cloudflare Account** (free)
    - Sign up at https://cloudflare.com
-   
-2. **Domain Name** 
+2. **Domain Name**
    - Buy from Namecheap, Google Domains, etc. (~$10/year)
    - Or use Cloudflare's free subdomain (yourdomain.cloudflare.com)
 
@@ -111,14 +112,11 @@ Your App on Raspberry Pi
    - **Subdomain:** `schoolideas`
    - **Domain:** `yourdomain.com`
    - Full URL will be: `schoolideas.yourdomain.com`
-   
    - **Service:**
      - Type: `HTTP`
      - URL: `nginx:80` (internal Docker network)
-   
    - **Additional settings:**
      - ✅ No TLS Verify (since it's local Docker)
-   
    - Click "Save tunnel"
 
 5. **Tunnel is Created!**
@@ -131,6 +129,7 @@ Your App on Raspberry Pi
 ### Complete Docker Compose Configuration
 
 **File structure on Pi:**
+
 ```
 ~/schoolideas/
 ├── docker-compose.yml
@@ -285,6 +284,7 @@ DOMAIN=schoolideas.yourdomain.com
 ```
 
 **Generate secure secrets:**
+
 ```bash
 # On Raspberry Pi
 openssl rand -base64 32
@@ -309,8 +309,8 @@ http {
     gzip on;
     gzip_vary on;
     gzip_min_length 1024;
-    gzip_types text/plain text/css text/xml text/javascript 
-               application/x-javascript application/xml+rss 
+    gzip_types text/plain text/css text/xml text/javascript
+               application/x-javascript application/xml+rss
                application/json application/javascript;
 
     # Upstream backend
@@ -335,13 +335,13 @@ http {
         location /api/ {
             proxy_pass http://backend;
             proxy_http_version 1.1;
-            
+
             # Headers
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
-            
+
             # Timeouts
             proxy_connect_timeout 60s;
             proxy_send_timeout 60s;
@@ -352,14 +352,14 @@ http {
         location /ws/ {
             proxy_pass http://backend;
             proxy_http_version 1.1;
-            
+
             # WebSocket headers
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "upgrade";
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            
+
             # Timeouts for long-lived connections
             proxy_connect_timeout 7d;
             proxy_send_timeout 7d;
@@ -370,7 +370,7 @@ http {
         location / {
             root /usr/share/nginx/html;
             try_files $uri $uri/ /index.html;
-            
+
             # Cache static assets
             location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
                 expires 1y;
@@ -478,6 +478,7 @@ docker-compose logs -f
 ```
 
 **You should see:**
+
 ```
 schoolideas-tunnel    running
 schoolideas-nginx     running
@@ -493,12 +494,14 @@ schoolideas-db        running
    - Green checkmark
 
 2. **Test Your Domain**
+
    ```bash
    curl https://schoolideas.yourdomain.com
    # Should return your frontend HTML
    ```
 
 3. **Test API**
+
    ```bash
    curl https://schoolideas.yourdomain.com/api/health
    # Should return: {"status":"healthy"}
@@ -540,17 +543,14 @@ db.yourdomain.com → http://pgadmin:80
    - Go to Access → Applications
    - Click "Add an application"
    - Choose "Self-hosted"
-   
 2. **Application Setup:**
    - Name: "Teacher Dashboard"
    - Subdomain: `schoolideas`
    - Path: `/teacher/*`
-   
 3. **Create Access Policy:**
    - Name: "Teachers Only"
    - Action: Allow
    - Include: Email → `*@school.com`
-   
 4. **Save**
 
 Now only users with @school.com emails can access `/teacher/*` routes!
@@ -568,6 +568,7 @@ Now only users with @school.com emails can access `/teacher/*` routes!
    - Threat analytics
 
 **Application Insights:**
+
 ```
 Zero Trust → Analytics → Access
 
@@ -607,16 +608,19 @@ docker-compose up -d --build backend
 ### Database Backups
 
 **Manual Backup:**
+
 ```bash
 docker exec schoolideas-db pg_dump -U schooladmin schoolideas > backup.sql
 ```
 
 **Restore Backup:**
+
 ```bash
 cat backup.sql | docker exec -i schoolideas-db psql -U schooladmin schoolideas
 ```
 
 **Download Backup to Your Computer:**
+
 ```bash
 scp pi@192.168.1.100:~/schoolideas/backups/backup_20250123.sql ./
 ```
@@ -658,6 +662,7 @@ docker-compose up -d
 ### Tunnel Shows "Inactive"
 
 **Check:**
+
 ```bash
 # Check cloudflared container
 docker-compose logs cloudflared
@@ -669,6 +674,7 @@ docker-compose logs cloudflared
 ```
 
 **Fix:**
+
 - Verify `CLOUDFLARE_TUNNEL_TOKEN` in `.env`
 - Ensure token has no extra spaces
 - Recreate tunnel in Cloudflare dashboard if needed
@@ -678,6 +684,7 @@ docker-compose logs cloudflared
 **Means:** Cloudflare can reach tunnel, but nginx/backend is down
 
 **Check:**
+
 ```bash
 # Is nginx running?
 docker ps | grep nginx
@@ -693,6 +700,7 @@ docker-compose logs backend
 ```
 
 **Fix:**
+
 ```bash
 docker-compose restart nginx
 docker-compose restart backend
@@ -701,6 +709,7 @@ docker-compose restart backend
 ### Database Connection Failed
 
 **Check:**
+
 ```bash
 # Is database running?
 docker ps | grep postgres
@@ -713,6 +722,7 @@ docker exec schoolideas-db psql -U schooladmin -d schoolideas -c "SELECT 1;"
 ```
 
 **Fix:**
+
 ```bash
 # Restart database
 docker-compose restart database
@@ -727,6 +737,7 @@ docker-compose up -d
 **Cloudflare Tunnel handles SSL automatically!**
 
 If you see mixed content warnings:
+
 - Make sure frontend makes API calls to `https://` not `http://`
 - Update `.env.production` in React app:
   ```
@@ -736,6 +747,7 @@ If you see mixed content warnings:
 ### Slow Performance
 
 **Check:**
+
 ```bash
 # Raspberry Pi resources
 htop
@@ -748,6 +760,7 @@ docker-compose logs nginx | grep -i "slow"
 ```
 
 **Optimize:**
+
 ```bash
 # Enable Cloudflare caching
 # In Cloudflare Dashboard → Caching → Configuration
@@ -810,17 +823,20 @@ sudo apt update && sudo apt upgrade -y
 ### 5. Cloudflare WAF Rules
 
 In Cloudflare Dashboard:
+
 1. Security → WAF → Create firewall rule
 
 **Block common attacks:**
+
 ```
 Name: Block SQL Injection
-Expression: (http.request.uri.query contains "union select") or 
+Expression: (http.request.uri.query contains "union select") or
             (http.request.uri.query contains "drop table")
 Action: Block
 ```
 
 **Rate Limiting:**
+
 ```
 Name: Rate Limit API
 Expression: (http.request.uri.path matches "^/api/")
@@ -842,21 +858,22 @@ docker-compose logs nginx | grep -i "404\|401\|403"
 
 ## Part 8: Cost Breakdown
 
-| Item | Cost | Frequency |
-|------|------|-----------|
-| Cloudflare Tunnel | Free | - |
-| Cloudflare Zero Trust (free tier) | Free | Up to 50 users |
-| Domain name | $10-15 | Annual |
-| Raspberry Pi 4 (4GB) | $55 | One-time |
-| MicroSD card (64GB) | $12 | One-time |
-| Power supply | $8 | One-time |
-| Case with cooling | $10 | One-time |
-| Electricity (~5W 24/7) | $5 | Annual |
+| Item                              | Cost   | Frequency      |
+| --------------------------------- | ------ | -------------- |
+| Cloudflare Tunnel                 | Free   | -              |
+| Cloudflare Zero Trust (free tier) | Free   | Up to 50 users |
+| Domain name                       | $10-15 | Annual         |
+| Raspberry Pi 4 (4GB)              | $55    | One-time       |
+| MicroSD card (64GB)               | $12    | One-time       |
+| Power supply                      | $8     | One-time       |
+| Case with cooling                 | $10    | One-time       |
+| Electricity (~5W 24/7)            | $5     | Annual         |
 
 **Total First Year:** $100-105  
 **Annual After:** $15-20
 
 **vs. Traditional Cloud Hosting:**
+
 - Heroku: $25/month = $300/year
 - DigitalOcean: $12/month = $144/year
 - AWS: $20+/month = $240+/year
@@ -870,11 +887,13 @@ docker-compose logs nginx | grep -i "404\|401\|403"
 ### When to Upgrade
 
 **Stay on Raspberry Pi if:**
+
 - < 500 concurrent users
 - < 10 requests/second
 - < 1GB database
 
 **Consider cloud upgrade if:**
+
 - > 500 concurrent users
 - > 100 requests/second
 - Need 99.99% uptime SLA
@@ -883,12 +902,14 @@ docker-compose logs nginx | grep -i "404\|401\|403"
 ### Raspberry Pi Limits
 
 **Raspberry Pi 4 (4GB) can handle:**
+
 - ✅ 200-500 concurrent users
 - ✅ 50 requests/second
 - ✅ 10GB database
 - ✅ 1000s of messages/day
 
 **Optimize before upgrading:**
+
 1. Add Redis cache
 2. Optimize database queries (add indexes)
 3. Enable Cloudflare caching
@@ -918,7 +939,7 @@ app.get('/api/ideas', async (req, res) => {
   if (cached) {
     return res.json(JSON.parse(cached));
   }
-  
+
   const ideas = await db.query('SELECT * FROM ideas');
   await client.setEx('ideas:all', 300, JSON.stringify(ideas.rows)); // Cache 5 min
   res.json(ideas.rows);
@@ -935,9 +956,10 @@ app.get('/api/ideas', async (req, res) => {
 ✅ **Works behind CGNAT**  
 ✅ **Simple Docker setup**  
 ✅ **Auto backups**  
-✅ **Low cost ($15/year after initial setup)**  
+✅ **Low cost ($15/year after initial setup)**
 
 Your School Ideas app is now:
+
 - 🌐 Accessible from anywhere
 - 🔒 Secure (HTTPS + Cloudflare protection)
 - 🚀 Fast (Cloudflare CDN)
@@ -982,6 +1004,7 @@ docker system prune -a
 ## Need Help?
 
 **ChatGPT Prompt:**
+
 ```
 I'm deploying School Ideas app on Raspberry Pi using Cloudflare Tunnel. I need help with:
 
