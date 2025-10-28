@@ -811,7 +811,7 @@ cd school-ideas-app
 # Create .env.production file
 echo "VITE_API_URL=https://schoolideas.yourdomain.com/api" > .env.production
 
-# Build
+# Build (Vite outDir: build)
 npm run build
 ```
 
@@ -820,7 +820,7 @@ npm run build
 ```bash
 # On your computer
 # Compress build folder
-tar -czf build.tar.gz dist/
+tar -czf build.tar.gz build/
 
 # Copy to Pi
 scp build.tar.gz pi@192.168.1.100:~/schoolideas/frontend/
@@ -831,7 +831,7 @@ ssh pi@192.168.1.100
 # Extract
 cd ~/schoolideas/frontend
 tar -xzf build.tar.gz
-mv dist build
+# Result: ./frontend/build (no rename needed)
 ```
 
 ---

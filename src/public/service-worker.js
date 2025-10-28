@@ -30,19 +30,21 @@ self.addEventListener('install', (event) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    Promise.all([
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Claim all clients immediately (must be inside waitUntil)
+      self.clients.claim(),
+    ])
   );
-  // Claim all clients immediately
-  return self.clients.claim();
 });
 
 // Fetch event - serve from cache when possible, fallback to network

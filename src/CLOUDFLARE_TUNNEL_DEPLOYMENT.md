@@ -416,7 +416,7 @@ cd school-ideas-app
 npm run build
 
 # Compress build
-tar -czf frontend.tar.gz dist/
+tar -czf frontend.tar.gz build/
 
 # Compress backend
 tar -czf backend.tar.gz backend/
@@ -433,7 +433,7 @@ cd ~/schoolideas
 
 # Extract frontend
 tar -xzf frontend.tar.gz -C frontend/
-mv frontend/dist/* frontend/build/
+# Result: frontend/build/
 
 # Extract backend
 tar -xzf backend.tar.gz
@@ -589,7 +589,7 @@ See:
 npm run build
 
 # Copy to Pi
-scp -r dist/* pi@192.168.1.100:~/schoolideas/frontend/build/
+scp -r build/* pi@192.168.1.100:~/schoolideas/frontend/build/
 
 # On Pi: Restart nginx (or not needed - static files update automatically)
 docker-compose restart nginx

@@ -33,19 +33,13 @@ Welcome! This document is your roadmap to understanding, deploying, and maintain
 
 ### **Platform-Specific Guides**
 
-3. **📱 [IOS_DEPLOYMENT_GUIDE.md](./IOS_DEPLOYMENT_GUIDE.md)**
-   - **What it covers:** Deploy to iPhone/iPad and Apple App Store using Capacitor
-   - **Read if:** You want an iOS app
-   - **Time:** 3-4 hours + 1-3 day review
-   - **Cost:** $99/year Apple Developer account
-
-4. **🤖 [MOBILE_APP_GUIDE.md](./MOBILE_APP_GUIDE.md)**
+3. **🤖 [MOBILE_APP_GUIDE.md](./MOBILE_APP_GUIDE.md)**
    - **What it covers:** PWA setup and Android deployment with Capacitor
    - **Read if:** You want installable web app or Play Store app
    - **Time:** 2-3 hours
    - **Cost:** $25 one-time (Play Store)
 
-5. **💾 [BACKEND_SETUP_GUIDE.md](./BACKEND_SETUP_GUIDE.md)**
+4. **💾 [BACKEND_SETUP_GUIDE.md](./BACKEND_SETUP_GUIDE.md)**
    - **What it covers:** Supabase integration, authentication, database schema
    - **Read if:** You want to use Supabase instead of self-hosting
    - **Time:** 1-2 hours
@@ -65,7 +59,7 @@ Welcome! This document is your roadmap to understanding, deploying, and maintain
 npm install
 npm run dev
 
-# Visit http://localhost:5173
+# Visit http://localhost:3000
 ```
 
 **Features already working:**
@@ -92,40 +86,20 @@ npm run dev
    - DDoS protection
    - **Total cost:** ~$100 first year, $15/year after
 
-### Path 3: Mobile App (2-4 hours)
+### Path 3: Mobile App (2-3 hours)
 
 **For maximum reach and app store presence**
 
 1. **PWA (Easiest):**
    - Already configured!
    - Users install from browser
-   - Works on Android & iOS
+   - Works on Android
    - [MOBILE_APP_GUIDE.md](./MOBILE_APP_GUIDE.md)
 
 2. **Google Play Store:**
    - [MOBILE_APP_GUIDE.md](./MOBILE_APP_GUIDE.md)
    - Cost: $25 one-time
    - Time: 2-3 hours
-
-3. **Apple App Store:**
-   - [IOS_DEPLOYMENT_GUIDE.md](./IOS_DEPLOYMENT_GUIDE.md)
-   - Cost: $99/year
-   - Requires Mac
-   - Time: 3-4 hours
-
-### Path 4: Cloud Hosting (30 minutes)
-
-**If you don't want to manage hardware**
-
-1. **Use Supabase (Recommended):**
-   - [BACKEND_SETUP_GUIDE.md](./BACKEND_SETUP_GUIDE.md)
-   - Free tier: Good for testing
-   - Paid: $25/month for production
-
-2. **Or use:**
-   - Vercel (frontend) + Supabase (backend) = Free tier available
-   - Heroku: ~$25/month
-   - DigitalOcean: ~$12/month
 
 ---
 
@@ -156,7 +130,6 @@ Gather feedback
 Optionally: Submit to app stores
 ↓
 Android: $25 one-time
-iOS: $99/year (if needed)
 ```
 
 ### For Developers (Learning)
@@ -357,23 +330,22 @@ Logging
 
 ## 📱 Mobile App Options Compared
 
-| Feature | PWA | Capacitor (Android) | Capacitor (iOS) |
-|---------|-----|---------------------|-----------------|
-| **Install from** | Browser | Google Play | App Store |
-| **Cost** | Free | $25 one-time | $99/year |
-| **Setup time** | 0 min (done!) | 2-3 hours | 3-4 hours |
-| **Native features** | Limited | Full | Full |
-| **Offline support** | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Push notifications** | ⚠️ Limited | ✅ Full | ✅ Full |
-| **Camera access** | ⚠️ Limited | ✅ Full | ✅ Full |
-| **App Store presence** | ❌ No | ✅ Yes | ✅ Yes |
-| **Auto updates** | ✅ Instant | Manual | Manual |
-| **Works on** | All platforms | Android only | iOS only |
+| Feature | PWA | Capacitor |
+|---------|-----|-----------|
+| **Ease of Setup** | ✅ Very Easy | ⚠️ Moderate |
+| **Distribution** | Via website only | ✅ App stores |
+| **Installation** | Browser prompt | ✅ App store |
+| **Offline Support** | ✅ Yes | ✅ Yes |
+| **Native Features** | ⚠️ Limited | ✅ Full access |
+| **Updates** | ✅ Automatic | Manual (via store) |
+| **Cost** | ✅ Free | $25/year |
+| **App Discoverability** | ⚠️ SEO only | ✅ App store search |
 
 **Recommendation:**
 1. **Start with PWA** (it's already done!)
 2. **Add Android** if you need Play Store presence
-3. **Add iOS** only if you have many iPhone users and budget
+
+You can have both! Keep the PWA for web users and create a Capacitor app for app store distribution.
 
 ---
 
@@ -425,14 +397,14 @@ Please provide step-by-step guidance.
 **Fix:** Already fixed! Service worker now gracefully handles iframe environments.
 
 ### "Can't access from phone on same network"
-**Issue:** Firewall blocking local network access
+**Issue:** Firewall blocking local network access  
 **Fix:**
 ```bash
 # On development computer
 npm run dev -- --host
 
 # Access from phone at:
-http://YOUR_COMPUTER_IP:5173
+http://YOUR_COMPUTER_IP:3000
 ```
 
 ### "Database connection refused"

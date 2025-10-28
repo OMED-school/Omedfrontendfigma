@@ -169,7 +169,7 @@
 
 - [ ] **Compressed build**
   ```bash
-  tar -czf frontend.tar.gz dist/
+  tar -czf frontend.tar.gz build/
   ```
 
 - [ ] **Uploaded to Pi**
@@ -181,7 +181,7 @@
   ```bash
   cd ~/schoolideas
   tar -xzf frontend.tar.gz -C frontend/
-  mv frontend/dist/* frontend/build/
+  # Result: frontend/build/
   ```
 
 ### 🔧 Backend Setup

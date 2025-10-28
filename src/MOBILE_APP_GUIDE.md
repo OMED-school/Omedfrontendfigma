@@ -1,6 +1,20 @@
 # Mobile App Deployment Guide
 
-This guide explains how to deploy your School Ideas app as a mobile application on Android (and iOS).
+Dieser Branch ist Android-orientiert und bleibt PWA-first (ohne Zwang zu Capacitor).
+
+## Quick Android via npx
+
+```bash
+# Erstaufbau
+npm run build
+npx cap init           # Web directory: build
+npx cap add android
+
+# Zyklen
+npm run build
+npx cap sync
+npx cap open android   # Öffnet Android Studio
+```
 
 ## Current Status: ✅ PWA Ready!
 
@@ -67,17 +81,15 @@ You need to create icon images and place them in `/public/icons/`:
 Capacitor wraps your web app as a native Android/iOS app that can be published to app stores.
 
 ### Step 1: Install Capacitor
-
 ```bash
 npm install @capacitor/core @capacitor/cli
 npm install @capacitor/android
 npx cap init
 ```
-
 When prompted:
 - **App name:** School Ideas
 - **App ID:** com.yourschool.ideas (use reverse domain)
-- **Web directory:** dist
+- **Web directory:** build
 
 ### Step 2: Build Your Web App
 

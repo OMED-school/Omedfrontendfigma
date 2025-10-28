@@ -15,10 +15,15 @@ export function usePWA() {
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const isHttps = window.location.protocol === 'https:';
     const inIframe = window !== window.parent;
-    
-    // Skip PWA features in iframe environments (like Figma preview)
-    if (inIframe) {
-      console.log('PWA features disabled in iframe environment');
+
+    // Capacitor native runtime (Android/iOS)
+    const isCapacitor = typeof (window as any).Capacitor !== 'undefined'
+      && typeof (window as any).Capacitor?.isNativePlatform === 'function'
+      && (window as any).Capacitor.isNativePlatform();
+
+    // Skip PWA features in iframe environments or native WebView
+    if (inIframe || isCapacitor) {
+      console.log('PWA features disabled in this environment (iframe/native).');
       return;
     }
 
