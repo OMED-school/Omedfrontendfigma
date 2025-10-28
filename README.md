@@ -1,6 +1,6 @@
 # 🎓 OMED - School Ideas Platform
 
-Willkommen bei der School Ideas Platform! Dies ist ein Reddit-ähnliches Vorschlagssystem für Schulen, das von Grund auf neu entwickelt wurde.
+Willkommen bei der OMED! Dies ist ein Reddit-ähnliches Vorschlagssystem für Schulen, das von Grund auf neu entwickelt wurde.
 
 Dieses Projekt wurde mit **React, TypeScript, Vite und Tailwind CSS** erstellt und ist so konzipiert, dass es auf verschiedenen Plattformen bereitgestellt werden kann:
 
@@ -35,3 +35,5 @@ Für eine vollständige Anleitung zum Verständnis, zur Bereitstellung und zur W
 ➡️ **[START_HERE_README.md](./src/README_START_HERE.md)** ⬅️
 
 Dieses Dokument ist Ihr zentraler Leitfaden für das gesamte Projekt.
+
+This is a code bundle for OMED. The original project is available at https://www.figma.com/design/w8KKj0bn4zWybWnHSJArpo/OMED.
