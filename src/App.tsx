@@ -18,7 +18,8 @@ import { useVote } from "./hooks/useVote";
 import { useIdeaActions } from "./hooks/useIdeaActions";
 import { useComments } from "./hooks/useComments";
 
-
+// TODO: Replace with real profile statistics from Supabase
+// This would require aggregating user's ideas, votes, and comments
 const mockProfile = {
   name: "John Student",
   username: "johnstudent",
