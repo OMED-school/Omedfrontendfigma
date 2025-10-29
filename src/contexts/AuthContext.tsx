@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { mockBackend, type User } from '../lib/mockBackend';
+import { authService, type User } from '../lib/supabaseAuth';
 
 interface AuthContextType {
   user: User | null;
@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check if user is already logged in
     const checkAuth = async () => {
       try {
-        const currentUser = await mockBackend.getCurrentUser();
+        const currentUser = await authService.getCurrentUser();
         setUser(currentUser);
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const { user: loggedInUser } = await mockBackend.login(email, password);
+      const { user: loggedInUser } = await authService.login(email, password);
       setUser(loggedInUser);
     } catch (error) {
       throw error;
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signup = async (data: { email: string; password: string; name: string; username: string }) => {
     try {
-      const { user: newUser } = await mockBackend.signup(data);
+      const { user: newUser } = await authService.signup(data);
       setUser(newUser);
     } catch (error) {
       throw error;
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await mockBackend.logout();
+      await authService.logout();
       setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);
