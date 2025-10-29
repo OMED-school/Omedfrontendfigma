@@ -7,82 +7,45 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Card, CardContent } from "./ui/card";
 import { Send, User, Search } from "lucide-react";
 import { cn } from "./ui/utils";
-
-interface ChatMessage {
-  id: string;
-  sender: string;
-  content: string;
-  timestamp: string;
-  isCurrentUser: boolean;
-}
-
-interface ChatUser {
-  id: string;
-  name: string;
-  isOnline: boolean;
-  lastMessage?: string;
-}
+import { useAuth } from "../contexts/AuthContext";
+import { useChatUsers, useMessages } from "../hooks/useMessages";
 
 interface ChatModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const mockUsers: ChatUser[] = [
-  { id: "1", name: "Alex Chen", isOnline: true, lastMessage: "Great idea about the library!" },
-  { id: "2", name: "Sarah Wilson", isOnline: false, lastMessage: "Thanks for the feedback" },
-  { id: "3", name: "Mike Johnson", isOnline: true, lastMessage: "When is the next meeting?" },
-  { id: "4", name: "Emma Davis", isOnline: true, lastMessage: "I voted on your proposal" },
-];
-
-const mockMessages: ChatMessage[] = [
-  {
-    id: "1",
-    sender: "Alex Chen",
-    content: "Hey! I saw your idea about improving the cafeteria menu. Really interesting points!",
-    timestamp: "2:30 PM",
-    isCurrentUser: false,
-  },
-  {
-    id: "2",
-    sender: "You",
-    content: "Thanks! I think having more healthy options would really make a difference.",
-    timestamp: "2:32 PM",
-    isCurrentUser: true,
-  },
-  {
-    id: "3",
-    sender: "Alex Chen",
-    content: "Absolutely. Have you considered proposing a student survey to gather more input?",
-    timestamp: "2:35 PM",
-    isCurrentUser: false,
-  },
-  {
-    id: "4",
-    sender: "You",
-    content: "That's a great idea! I'll add that to my proposal.",
-    timestamp: "2:37 PM",
-    isCurrentUser: true,
-  },
-];
-
 export function ChatModal({ isOpen, onClose }: ChatModalProps) {
-  const [selectedUser, setSelectedUser] = useState<string | null>("1");
+  const { user } = useAuth();
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredUsers = mockUsers.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Fetch users and messages using Supabase hooks
+  const { users, loading: usersLoading } = useChatUsers(user?.id || '');
+  const { messages, sendMessage, loading: messagesLoading } = useMessages(
+    user?.id || '',
+    selectedUserId || undefined
   );
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const filteredUsers = users.filter(chatUser =>
+    chatUser.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      // In a real app, this would send the message to the backend
-      console.log("Sending message:", newMessage);
-      setNewMessage("");
+    if (newMessage.trim() && user) {
+      try {
+        await sendMessage(newMessage);
+        setNewMessage("");
+      } catch (error) {
+        console.error('Error sending message:', error);
+        alert('Failed to send message');
+      }
     }
   };
+
+  const selectedUser = users.find(u => u.id === selectedUserId);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -111,14 +74,14 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
             
             <ScrollArea className="h-[calc(600px-120px)]">
               <div className="p-2 space-y-1">
-                {filteredUsers.map((user) => (
+                {filteredUsers.map((chatUser) => (
                   <Card
-                    key={user.id}
+                    key={chatUser.id}
                     className={cn(
                       "cursor-pointer transition-colors hover:bg-accent",
-                      selectedUser === user.id && "bg-accent"
+                      selectedUserId === chatUser.id && "bg-accent"
                     )}
-                    onClick={() => setSelectedUser(user.id)}
+                    onClick={() => setSelectedUserId(chatUser.id)}
                   >
                     <CardContent className="p-3">
                       <div className="flex items-center gap-3">
@@ -128,16 +91,16 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
                               <User className="h-5 w-5" />
                             </AvatarFallback>
                           </Avatar>
-                          {user.isOnline && (
+                          {chatUser.isOnline && (
                             <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
                           )}
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{user.name}</p>
-                          {user.lastMessage && (
+                          <p className="font-medium truncate">{chatUser.name}</p>
+                          {chatUser.lastMessage && (
                             <p className="text-xs text-muted-foreground truncate">
-                              {user.lastMessage}
+                              {chatUser.lastMessage}
                             </p>
                           )}
                         </div>
@@ -151,7 +114,7 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
           
           {/* Chat Area */}
           <div className="flex-1 flex flex-col">
-            {selectedUser ? (
+            {selectedUserId ? (
               <>
                 {/* Chat Header */}
                 <div className="p-4 border-b">
@@ -163,10 +126,10 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
                     </Avatar>
                     <div>
                       <h3 className="font-medium">
-                        {mockUsers.find(u => u.id === selectedUser)?.name}
+                        {selectedUser?.name}
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        {mockUsers.find(u => u.id === selectedUser)?.isOnline ? "Online" : "Offline"}
+                        {selectedUser?.isOnline ? "Online" : "Offline"}
                       </p>
                     </div>
                   </div>
@@ -175,7 +138,7 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
                 {/* Messages */}
                 <ScrollArea className="flex-1 p-4">
                   <div className="space-y-4">
-                    {mockMessages.map((message) => (
+                    {messages.map((message) => (
                       <div
                         key={message.id}
                         className={cn(
