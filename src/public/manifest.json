@@ -3,10 +3,12 @@
   "short_name": "School Ideas",
   "description": "Submit and vote on school improvement ideas. A platform for students, teachers, and principals.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#030213",
   "orientation": "portrait-primary",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -63,13 +65,33 @@
       "src": "/screenshots/desktop-1.png",
       "sizes": "1280x720",
       "type": "image/png",
-      "form_factor": "wide"
+      "form_factor": "wide",
+      "label": "Desktop view of School Ideas platform"
     },
     {
       "src": "/screenshots/mobile-1.png",
       "sizes": "750x1334",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Mobile view of School Ideas platform"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Submit Idea",
+      "short_name": "Submit",
+      "description": "Submit a new school improvement idea",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/icons/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "display_override": ["standalone", "minimal-ui"],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
 }

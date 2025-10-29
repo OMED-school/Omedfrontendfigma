@@ -1,18 +1,23 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Header } from "./components/Header";
 import { IdeaCard, type Idea } from "./components/IdeaCard";
 import { IdeaSubmissionForm } from "./components/IdeaSubmissionForm";
 import { CommentSection, type Comment } from "./components/CommentSection";
-import { ProfileModal } from "./components/ProfileModal";
-import { ChatModal } from "./components/ChatModal";
-import { DetailedThreadView } from "./components/DetailedThreadView";
-import { TeacherDashboard, type TeacherIdea, type IdeaStatus } from "./components/TeacherDashboard";
-import { PrincipalDashboard, type PrincipalIdea, type PrincipalStatus, type Priority } from "./components/PrincipalDashboard";
 import { InstallPrompt } from "./components/InstallPrompt";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
 import { Button } from "./components/ui/button";
 import { GraduationCap, Users, Crown } from "lucide-react";
+
+// Lazy load heavy components for better Android performance
+const ProfileModal = lazy(() => import("./components/ProfileModal").then(m => ({ default: m.ProfileModal })));
+const ChatModal = lazy(() => import("./components/ChatModal").then(m => ({ default: m.ChatModal })));
+const DetailedThreadView = lazy(() => import("./components/DetailedThreadView").then(m => ({ default: m.DetailedThreadView })));
+const TeacherDashboard = lazy(() => import("./components/TeacherDashboard").then(m => ({ default: m.TeacherDashboard })));
+const PrincipalDashboard = lazy(() => import("./components/PrincipalDashboard").then(m => ({ default: m.PrincipalDashboard })));
+
+import type { TeacherIdea, IdeaStatus } from "./components/TeacherDashboard";
+import type { PrincipalIdea, PrincipalStatus, Priority } from "./components/PrincipalDashboard";
 
 // Mock data - Principal ideas include all status fields
 const mockPrincipalIdeas: PrincipalIdea[] = [
@@ -417,86 +422,88 @@ export default function App() {
       </div>
       
       <main className="container max-w-4xl mx-auto px-4 py-6">
-        {userRole === 'principal' ? (
-          <PrincipalDashboard
-            ideas={principalIdeas}
-            onApprove={handlePrincipalApprove}
-            onReject={handlePrincipalReject}
-            onRequestMoreInfo={handleRequestMoreInfo}
-          />
-        ) : userRole === 'teacher' ? (
-          <TeacherDashboard
-            ideas={teacherIdeas}
-            onForwardToPrincipal={handleForwardToPrincipal}
-            onReject={handleReject}
-            onApprove={handleApprove}
-            onMarkReviewed={handleMarkReviewed}
-          />
-        ) : viewMode === 'list' ? (
-          <div className="space-y-6">
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <h2 className="text-2xl font-semibold">School Ideas</h2>
-              
-              <div className="flex gap-2">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="popular">Popular</SelectItem>
-                    <SelectItem value="recent">Recent</SelectItem>
-                    <SelectItem value="comments">Most Discussed</SelectItem>
-                  </SelectContent>
-                </Select>
+        <Suspense fallback={<div className="text-center py-12">Loading...</div>}>
+          {userRole === 'principal' ? (
+            <PrincipalDashboard
+              ideas={principalIdeas}
+              onApprove={handlePrincipalApprove}
+              onReject={handlePrincipalReject}
+              onRequestMoreInfo={handleRequestMoreInfo}
+            />
+          ) : userRole === 'teacher' ? (
+            <TeacherDashboard
+              ideas={teacherIdeas}
+              onForwardToPrincipal={handleForwardToPrincipal}
+              onReject={handleReject}
+              onApprove={handleApprove}
+              onMarkReviewed={handleMarkReviewed}
+            />
+          ) : viewMode === 'list' ? (
+            <div className="space-y-6">
+              {/* Filters */}
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <h2 className="text-2xl font-semibold">School Ideas</h2>
                 
-                <Select value={filterBy} onValueChange={setFilterBy}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category === "all" ? "All Categories" : category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="popular">Popular</SelectItem>
+                      <SelectItem value="recent">Recent</SelectItem>
+                      <SelectItem value="comments">Most Discussed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select value={filterBy} onValueChange={setFilterBy}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category === "all" ? "All Categories" : category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
-            
-            {/* Ideas Feed */}
-            <div className="space-y-4">
-              {filteredIdeas.map((idea) => (
-                <IdeaCard
-                  key={idea.id}
-                  idea={idea}
-                  onVote={handleVote}
-                  onComment={handleComment}
-                  onClick={handleCardClick}
-                />
-              ))}
-            </div>
-            
-            {filteredIdeas.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No ideas found matching your filters.</p>
+              
+              {/* Ideas Feed */}
+              <div className="space-y-4">
+                {filteredIdeas.map((idea) => (
+                  <IdeaCard
+                    key={idea.id}
+                    idea={idea}
+                    onVote={handleVote}
+                    onComment={handleComment}
+                    onClick={handleCardClick}
+                  />
+                ))}
               </div>
-            )}
-          </div>
-        ) : (
-          <DetailedThreadView
-            idea={selectedIdea!}
-            comments={mockComments}
-            onBack={handleBackToList}
-            onVote={handleVote}
-            onAddComment={handleAddComment}
-            onVoteComment={handleVoteComment}
-          />
-        )}
+              
+              {filteredIdeas.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No ideas found matching your filters.</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <DetailedThreadView
+              idea={selectedIdea!}
+              comments={mockComments}
+              onBack={handleBackToList}
+              onVote={handleVote}
+              onAddComment={handleAddComment}
+              onVoteComment={handleVoteComment}
+            />
+          )}
+        </Suspense>
       </main>
       
-      {/* Modals */}
+      {/* Modals with lazy loading */}
       <IdeaSubmissionForm
         isOpen={showIdeaForm}
         onClose={() => setShowIdeaForm(false)}
@@ -512,16 +519,24 @@ export default function App() {
         onVoteComment={handleVoteComment}
       />
       
-      <ProfileModal
-        isOpen={showProfile}
-        onClose={() => setShowProfile(false)}
-        profile={mockProfile}
-      />
+      <Suspense fallback={null}>
+        {showProfile && (
+          <ProfileModal
+            isOpen={showProfile}
+            onClose={() => setShowProfile(false)}
+            profile={mockProfile}
+          />
+        )}
+      </Suspense>
       
-      <ChatModal
-        isOpen={showChat}
-        onClose={() => setShowChat(false)}
-      />
+      <Suspense fallback={null}>
+        {showChat && (
+          <ChatModal
+            isOpen={showChat}
+            onClose={() => setShowChat(false)}
+          />
+        )}
+      </Suspense>
       
       {/* PWA Install Prompt */}
       <InstallPrompt />

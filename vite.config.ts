@@ -54,11 +54,40 @@ export default defineConfig({
   build: {
     target: 'esnext',
     outDir: 'build',
+    // Android optimization: code splitting and chunk size optimization
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'radix-ui': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-accordion',
+          ],
+        },
+      },
+    },
+    // Optimize chunk size for mobile networks
+    chunkSizeWarningLimit: 600,
+    // Enable minification for smaller bundle size
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console.logs in production
+        drop_debugger: true,
+      },
+    },
   },
   server: {
     // Android-Gerät im gleichen Netzwerk kann zugreifen: http://<HOST-IP>:3000
     host: true,
     port: 3000,
     open: true,
+  },
+  // Performance optimizations
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
   },
 });
