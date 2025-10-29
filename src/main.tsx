@@ -12,10 +12,17 @@
         .then((registration) => {
           console.log('Service Worker registered successfully:', registration.scope);
           
-          // Check for updates periodically
+          // Check for updates when page becomes visible (better for battery life)
+          document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+              registration.update();
+            }
+          });
+          
+          // Also check periodically but less aggressively (every 30 minutes)
           setInterval(() => {
             registration.update();
-          }, 60000); // Check every minute
+          }, 30 * 60 * 1000); // 30 minutes
         })
         .catch((error) => {
           console.log('Service Worker registration failed:', error);

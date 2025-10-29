@@ -85,7 +85,7 @@ const ProfileModal = lazy(() => import("./components/ProfileModal"));
 #### Caching Strategy
 - **Network-first** for API calls (always fresh data)
 - **Cache-first** for static assets (faster loading)
-- **Stale-while-revalidate** for background updates
+- **Background refresh** for cached assets to stay up-to-date
 
 #### Features
 ```javascript
