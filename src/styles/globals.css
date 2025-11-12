@@ -126,6 +126,29 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Android performance optimizations */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Smooth scrolling for Android */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  /* Android touch optimization */
+  html {
+    touch-action: manipulation;
+  }
+
+  /* Better scrolling performance */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Optimize animations for Android */
+  @media (prefers-reduced-motion: no-preference) {
+    * {
+      scroll-behavior: smooth;
+    }
   }
 }
 
@@ -186,4 +209,19 @@
 
 html {
   font-size: var(--font-size);
+}
+
+/* Android-specific optimizations */
+@layer utilities {
+  /* Improve touch target sizes for Android */
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  /* Hardware acceleration for smoother animations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+  }
 }
