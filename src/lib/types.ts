@@ -1,6 +1,6 @@
 // Database types based on Supabase schema
 
-export type UserRole = 'student' | 'teacher' | 'principal';
+export type UserRole = 'student' | 'teacher' | 'principal' | 'admin';
 
 export interface Profile {
   id: string;
