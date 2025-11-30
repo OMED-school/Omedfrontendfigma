@@ -23,17 +23,17 @@ export function Header({ onNewIdea, onChat, onProfile }: HeaderProps) {
             />
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Button onClick={onNewIdea} className="gap-2">
             <Plus className="h-4 w-4" />
             New Idea
           </Button>
-          
+
           <Button variant="ghost" size="icon" onClick={onChat}>
             <MessageCircle className="h-4 w-4" />
           </Button>
-          
+
           <Button variant="ghost" size="icon" onClick={onProfile}>
             <Avatar className="h-8 w-8">
               <AvatarFallback>

@@ -10,34 +10,58 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Trash2, Ban } from "lucide-react";
-
-// Mock data
-const MOCK_USERS = [
-    { id: "1", name: "John Student", email: "john@school.edu", role: "student", status: "active", joinDate: "2024-09-01" },
-    { id: "2", name: "Jane Teacher", email: "jane@school.edu", role: "teacher", status: "active", joinDate: "2024-08-15" },
-    { id: "3", name: "Mr. Principal", email: "principal@school.edu", role: "principal", status: "active", joinDate: "2024-08-01" },
-    { id: "4", name: "Bad Actor", email: "troll@school.edu", role: "student", status: "suspended", joinDate: "2024-10-05" },
-];
+import { Search, Trash2, Ban, Loader2 } from "lucide-react";
+import { useUsers, type UserProfile } from "@/hooks/useUsers";
+import { toast } from "sonner";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import type { UserRole } from "@/lib/types";
 
 export function UserList() {
     const [searchTerm, setSearchTerm] = useState("");
-    const [users, setUsers] = useState(MOCK_USERS);
+    const { users, loading, updateUserRole, deleteUser } = useUsers();
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-    const handleDelete = (userId: string) => {
-        if (confirm("Are you sure you want to delete this user?")) {
-            setUsers(users.filter(u => u.id !== userId));
+    const handleDelete = async (userId: string) => {
+        if (confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+            setActionLoading(userId);
+            try {
+                await deleteUser(userId);
+                toast.success("User deleted successfully");
+            } catch (error) {
+                toast.error("Failed to delete user");
+            } finally {
+                setActionLoading(null);
+            }
         }
     };
 
-    const handleStatusChange = (userId: string, newStatus: string) => {
-        setUsers(users.map(u => u.id === userId ? { ...u, status: newStatus } : u));
+    const handleRoleChange = async (userId: string, newRole: UserRole) => {
+        setActionLoading(userId);
+        try {
+            await updateUserRole(userId, newRole);
+            toast.success(`User role updated to ${newRole}`);
+        } catch (error) {
+            toast.error("Failed to update user role");
+        } finally {
+            setActionLoading(null);
+        }
     };
 
     const filteredUsers = users.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        user.username.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    if (loading) {
+        return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+    }
 
     return (
         <div className="space-y-4">
@@ -66,44 +90,66 @@ export function UserList() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredUsers.map((user) => (
-                            <TableRow key={user.id}>
-                                <TableCell className="font-medium">{user.name}</TableCell>
-                                <TableCell>{user.email}</TableCell>
-                                <TableCell>
-                                    <Badge variant={user.role === 'student' ? 'secondary' : 'default'}>
-                                        {user.role}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant={user.status === 'active' ? 'outline' : 'destructive'}>
-                                        {user.status}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>{user.joinDate}</TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleStatusChange(user.id, user.status === 'active' ? 'suspended' : 'active')}
-                                            title={user.status === 'active' ? 'Suspend User' : 'Activate User'}
-                                        >
-                                            <Ban className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-destructive"
-                                            onClick={() => handleDelete(user.id)}
-                                            title="Delete User"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
+                        {filteredUsers.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                    No users found.
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        ) : (
+                            filteredUsers.map((user) => (
+                                <TableRow key={user.id}>
+                                    <TableCell className="font-medium">
+                                        <div>
+                                            <p>{user.full_name}</p>
+                                            <p className="text-xs text-muted-foreground">@{user.username}</p>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{user.email}</TableCell>
+                                    <TableCell>
+                                        <Select
+                                            defaultValue={user.role}
+                                            onValueChange={(val) => handleRoleChange(user.id, val as UserRole)}
+                                            disabled={actionLoading === user.id}
+                                        >
+                                            <SelectTrigger className="w-[110px] h-8">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="student">Student</SelectItem>
+                                                <SelectItem value="teacher">Teacher</SelectItem>
+                                                <SelectItem value="principal">Principal</SelectItem>
+                                                <SelectItem value="admin">Admin</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={user.status === 'active' ? 'outline' : 'destructive'}>
+                                            {user.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>{user.join_date}</TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-destructive"
+                                                onClick={() => handleDelete(user.id)}
+                                                title="Delete User"
+                                                disabled={actionLoading === user.id}
+                                            >
+                                                {actionLoading === user.id ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="h-4 w-4" />
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
                     </TableBody>
                 </Table>
             </div>

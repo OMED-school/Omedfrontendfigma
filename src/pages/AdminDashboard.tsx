@@ -1,31 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserList } from "@/components/Admin/UserList";
 import { IdeaList } from "@/components/Admin/IdeaList";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Lightbulb, Activity } from "lucide-react";
+import { useUsers } from "@/hooks/useUsers";
+import { useIdeas } from "@/hooks/useIdeas";
 
 export default function AdminDashboard() {
-    // Mock stats - in a real app these would come from an API
+    const { users, loading: usersLoading } = useUsers();
+    const { ideas, loading: ideasLoading } = useIdeas();
+
+    // Calculate stats
+    const totalUsers = users.length;
+    const totalIdeas = ideas.length;
+
+    // Calculate active users (users who posted an idea or comment recently - simplified for now)
+    // For now, we'll just count users with 'active' status
+    const activeUsers = users.filter(u => u.status === 'active').length;
+    const activePercentage = totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 0;
+
     const stats = [
         {
             title: "Total Users",
-            value: "1,234",
+            value: usersLoading ? "..." : totalUsers.toLocaleString(),
             icon: Users,
-            description: "+12% from last month",
+            description: "Registered accounts",
         },
         {
             title: "Total Ideas",
-            value: "456",
+            value: ideasLoading ? "..." : totalIdeas.toLocaleString(),
             icon: Lightbulb,
-            description: "+23 new this week",
+            description: "Submitted ideas",
         },
         {
-            title: "Active Engagement",
-            value: "89%",
+            title: "Active Users",
+            value: usersLoading ? "..." : `${activePercentage}%`,
             icon: Activity,
-            description: "Users active in last 30 days",
+            description: "Account status active",
         },
     ];
 

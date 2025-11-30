@@ -4,6 +4,7 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import PrincipalDashboard from "./pages/PrincipalDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import IdeaDetail from "./pages/IdeaDetail";
+import Login from "./pages/Login";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -13,7 +14,15 @@ export default function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/teacher"
             element={
@@ -38,7 +47,14 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/idea/:id" element={<IdeaDetail />} />
+          <Route
+            path="/idea/:id"
+            element={
+              <ProtectedRoute>
+                <IdeaDetail />
+              </ProtectedRoute>
+            }
+          />
           {/* Fallback route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

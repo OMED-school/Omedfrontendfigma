@@ -10,23 +10,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Trash2, ExternalLink } from "lucide-react";
+import { Search, Trash2, ExternalLink, Loader2 } from "lucide-react";
 import { useIdeas } from "@/hooks/useIdeas";
-import { useIdeaActions } from "@/hooks/useIdeaActions"; // Assuming we might add a delete action here later
+import { useIdeaActions } from "@/hooks/useIdeaActions";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 export function IdeaList() {
     const [searchTerm, setSearchTerm] = useState("");
-    // In a real app, we might want a specific useAdminIdeas hook that gets ALL ideas regardless of status
-    // For now, we reuse useIdeas which gets the public feed
     const { ideas, loading, refetch } = useIdeas();
+    const { deleteIdea } = useIdeaActions();
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-    // Mock delete since useIdeaActions might not have delete yet
     const handleDelete = async (ideaId: string) => {
         if (confirm("Are you sure you want to delete this idea? This cannot be undone.")) {
-            // await deleteIdea(ideaId);
-            alert("Delete functionality would be connected to API here");
-            refetch();
+            setActionLoading(ideaId);
+            try {
+                await deleteIdea(ideaId);
+                toast.success("Idea deleted successfully");
+                refetch();
+            } catch (error) {
+                console.error(error);
+                toast.error("Failed to delete idea");
+            } finally {
+                setActionLoading(null);
+            }
         }
     };
 
@@ -36,7 +44,7 @@ export function IdeaList() {
     );
 
     if (loading) {
-        return <div>Loading ideas...</div>;
+        return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
     }
 
     return (
@@ -66,35 +74,48 @@ export function IdeaList() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredIdeas.map((idea) => (
-                            <TableRow key={idea.id}>
-                                <TableCell className="font-medium">
-                                    <div className="flex items-center gap-2">
-                                        {idea.title}
-                                        <Link to={`/idea/${idea.id}`} target="_blank">
-                                            <ExternalLink className="h-3 w-3 text-muted-foreground" />
-                                        </Link>
-                                    </div>
-                                </TableCell>
-                                <TableCell>{idea.author}</TableCell>
-                                <TableCell>
-                                    <Badge variant="outline">{idea.category}</Badge>
-                                </TableCell>
-                                <TableCell>{idea.votes}</TableCell>
-                                <TableCell>{idea.timeAgo}</TableCell>
-                                <TableCell className="text-right">
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-destructive"
-                                        onClick={() => handleDelete(idea.id)}
-                                        title="Delete Idea"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
+                        {filteredIdeas.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                    No ideas found.
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        ) : (
+                            filteredIdeas.map((idea) => (
+                                <TableRow key={idea.id}>
+                                    <TableCell className="font-medium">
+                                        <div className="flex items-center gap-2">
+                                            {idea.title}
+                                            <Link to={`/idea/${idea.id}`} target="_blank">
+                                                <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                                            </Link>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{idea.author}</TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline">{idea.category}</Badge>
+                                    </TableCell>
+                                    <TableCell>{idea.votes}</TableCell>
+                                    <TableCell>{idea.timeAgo}</TableCell>
+                                    <TableCell className="text-right">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="text-destructive"
+                                            onClick={() => handleDelete(idea.id)}
+                                            title="Delete Idea"
+                                            disabled={actionLoading === idea.id}
+                                        >
+                                            {actionLoading === idea.id ? (
+                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                            ) : (
+                                                <Trash2 className="h-4 w-4" />
+                                            )}
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
                     </TableBody>
                 </Table>
             </div>

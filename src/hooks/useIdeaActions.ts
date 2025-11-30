@@ -31,15 +31,15 @@ export function useIdeaActions() {
     reviewedBy?: string
   ) {
     const updateData: any = { status };
-    
+
     if (notes !== undefined) {
       updateData.teacher_notes = notes;
     }
-    
+
     if (reviewedBy !== undefined) {
       updateData.reviewed_by = reviewedBy;
     }
-    
+
     if (status === 'forwarded') {
       updateData.forwarded_date = new Date().toISOString();
     }
@@ -61,19 +61,19 @@ export function useIdeaActions() {
     implementationDate?: string
   ) {
     const updateData: any = { principal_status: principalStatus };
-    
+
     if (notes !== undefined) {
       updateData.principal_notes = notes;
     }
-    
+
     if (budget !== undefined) {
       updateData.budget = budget;
     }
-    
+
     if (priority !== undefined) {
       updateData.priority = priority;
     }
-    
+
     if (implementationDate !== undefined) {
       updateData.implementation_date = implementationDate;
     }
@@ -86,9 +86,19 @@ export function useIdeaActions() {
     if (error) throw error;
   }
 
+  async function deleteIdea(ideaId: string) {
+    const { error } = await supabase
+      .from('ideas')
+      .delete()
+      .eq('id', ideaId);
+
+    if (error) throw error;
+  }
+
   return {
     createIdea,
     updateIdeaStatus,
     updatePrincipalStatus,
+    deleteIdea,
   };
 }
