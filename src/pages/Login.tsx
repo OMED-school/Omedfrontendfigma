@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Loader2, ShieldAlert } from "lucide-react";
+import { Loader2, ShieldAlert, Github, Music, Chrome, Gamepad2, Apple } from "lucide-react";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -49,6 +50,18 @@ export default function Login() {
             console.error(error);
             toast.error("Signup failed. Please try again.");
         } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleOAuth = async (provider: 'github' | 'spotify' | 'google' | 'discord' | 'apple') => {
+        setIsLoading(true);
+        try {
+            await authService.signInWithOAuth(provider);
+            // Note: OAuth redirect happens automatically, callback will handle navigation
+        } catch (error) {
+            console.error(error);
+            toast.error(`${provider} login failed. Please try again.`);
             setIsLoading(false);
         }
     };
@@ -178,6 +191,59 @@ export default function Login() {
                             </form>
                         </TabsContent>
                     </Tabs>
+
+                    <Separator className="my-4" />
+
+                    <div className="space-y-2">
+                        <p className="text-sm text-center text-muted-foreground">Or continue with:</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            <Button 
+                                variant="outline" 
+                                onClick={() => handleOAuth('github')}
+                                disabled={isLoading}
+                                className="w-full"
+                            >
+                                <Github className="mr-2 h-4 w-4" />
+                                GitHub
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => handleOAuth('spotify')}
+                                disabled={isLoading}
+                                className="w-full"
+                            >
+                                <Music className="mr-2 h-4 w-4" />
+                                Spotify
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => handleOAuth('google')}
+                                disabled={isLoading}
+                                className="w-full"
+                            >
+                                <Chrome className="mr-2 h-4 w-4" />
+                                Google
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => handleOAuth('discord')}
+                                disabled={isLoading}
+                                className="w-full"
+                            >
+                                <Gamepad2 className="mr-2 h-4 w-4" />
+                                Discord
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => handleOAuth('apple')}
+                                disabled={isLoading}
+                                className="w-full"
+                            >
+                                <Apple className="mr-2 h-4 w-4" />
+                                Apple
+                            </Button>
+                        </div>
+                    </div>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4 border-t pt-6">
                     <div className="text-xs text-center text-muted-foreground">

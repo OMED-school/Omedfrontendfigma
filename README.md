@@ -38,7 +38,7 @@ Dieses Projekt wurde mit **React, TypeScript, Vite und Tailwind CSS** erstellt u
     npm run dev
     ```
 
-4.  Öffnen Sie [http://localhost:5173](http://localhost:5173) in Ihrem Browser.
+4.  Öffnen Sie [http://localhost:3000](http://localhost:3000) in Ihrem Browser.
 
 ---
 

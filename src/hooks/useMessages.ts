@@ -17,6 +17,25 @@ export interface ChatUser {
   lastMessage?: string;
 }
 
+export interface Message {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  content: string;
+  read: boolean;
+  created_at: string;
+}
+
+export interface Conversation {
+  id: string;
+  username: string;
+  full_name: string;
+  avatar_url?: string;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unreadCount: number;
+}
+
 function formatTime(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -173,5 +192,87 @@ export function useChatUsers(currentUserId: string) {
     }
   }
 
-  return { users, loading, error, refetch: fetchUsers };
+  // New methods for friend messaging
+  const fetchConversations = async (): Promise<Conversation[]> => {
+    if (!currentUserId) return [];
+
+    try {
+      const { data: messageData } = await supabase
+        .from('messages')
+        .select('sender_id, recipient_id, content, created_at, read')
+        .or(`sender_id.eq.${currentUserId},recipient_id.eq.${currentUserId}`)
+        .order('created_at', { ascending: false });
+
+      const conversationMap = new Map<string, Conversation>();
+
+      for (const msg of messageData || []) {
+        const otherUserId = msg.sender_id === currentUserId ? msg.recipient_id : msg.sender_id;
+        
+        if (!conversationMap.has(otherUserId)) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username, full_name, avatar_url')
+            .eq('id', otherUserId)
+            .single();
+
+          conversationMap.set(otherUserId, {
+            id: otherUserId,
+            username: profile?.username || 'Unknown',
+            full_name: profile?.full_name || 'Unknown',
+            avatar_url: profile?.avatar_url,
+            lastMessage: msg.content,
+            lastMessageTime: msg.created_at,
+            unreadCount: msg.recipient_id === currentUserId && !msg.read ? 1 : 0,
+          });
+        } else {
+          const conv = conversationMap.get(otherUserId)!;
+          if (msg.recipient_id === currentUserId && !msg.read) {
+            conv.unreadCount = (conv.unreadCount || 0) + 1;
+          }
+        }
+      }
+
+      return Array.from(conversationMap.values());
+    } catch (err) {
+      console.error('Error fetching conversations:', err);
+      return [];
+    }
+  };
+
+  const sendMessage = async (recipientId: string, content: string): Promise<boolean> => {
+    if (!currentUserId || !content.trim()) return false;
+
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          sender_id: currentUserId,
+          recipient_id: recipientId,
+          content: content.trim(),
+        });
+
+      return !error;
+    } catch (err) {
+      console.error('Error sending message:', err);
+      return false;
+    }
+  };
+
+  const markAsRead = async (messageIds: string[]): Promise<boolean> => {
+    if (!currentUserId || messageIds.length === 0) return false;
+
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ read: true })
+        .in('id', messageIds);
+
+      return !error;
+    } catch (err) {
+      console.error('Error marking as read:', err);
+      return false;
+    }
+  };
+
+  return { users, loading, error, refetch: fetchUsers, fetchConversations, sendMessage, markAsRead };
 }

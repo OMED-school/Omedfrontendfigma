@@ -5,6 +5,10 @@ import PrincipalDashboard from "./pages/PrincipalDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import IdeaDetail from "./pages/IdeaDetail";
 import Login from "./pages/Login";
+import AuthCallback from "./pages/AuthCallback";
+import Settings from "./pages/Settings";
+import Messages from "./pages/Messages";
+import Discovery from "./pages/Discovery";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -15,11 +19,36 @@ export default function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
             path="/"
             element={
               <ProtectedRoute>
                 <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/discovery"
+            element={
+              <ProtectedRoute>
+                <Discovery />
               </ProtectedRoute>
             }
           />

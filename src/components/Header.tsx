@@ -1,7 +1,8 @@
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { Plus, MessageCircle, User, Search } from "lucide-react";
+import { Plus, MessageCircle, User, Search, Settings, Bluetooth } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   onNewIdea: () => void;
@@ -10,6 +11,8 @@ interface HeaderProps {
 }
 
 export function Header({ onNewIdea, onChat, onProfile }: HeaderProps) {
+  const navigate = useNavigate();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -30,8 +33,16 @@ export function Header({ onNewIdea, onChat, onProfile }: HeaderProps) {
             New Idea
           </Button>
 
-          <Button variant="ghost" size="icon" onClick={onChat}>
+          <Button variant="ghost" size="icon" onClick={() => navigate('/discovery')}>
+            <Bluetooth className="h-4 w-4" />
+          </Button>
+
+          <Button variant="ghost" size="icon" onClick={() => navigate('/messages')}>
             <MessageCircle className="h-4 w-4" />
+          </Button>
+
+          <Button variant="ghost" size="icon" onClick={() => navigate('/settings')}>
+            <Settings className="h-4 w-4" />
           </Button>
 
           <Button variant="ghost" size="icon" onClick={onProfile}>

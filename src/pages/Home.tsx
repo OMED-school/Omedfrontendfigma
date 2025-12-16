@@ -14,47 +14,6 @@ import { useComments } from "@/hooks/useComments";
 import { Header } from "@/components/Header";
 import { useNavigate } from "react-router-dom";
 
-// TODO: Replace with real profile statistics from Supabase
-const mockProfile = {
-    name: "John Student",
-    username: "johnstudent",
-    joinDate: "September 2024",
-    totalIdeas: 7,
-    totalVotes: 156,
-    totalComments: 23,
-    reputation: 284,
-    recentIdeas: [
-        {
-            id: "1",
-            title: "Install Solar Panels on School Roof",
-            votes: 42,
-            category: "Environment",
-            timeAgo: "2 hours ago",
-        },
-        {
-            id: "2",
-            title: "Create Study Pods in the Library",
-            votes: 29,
-            category: "Facilities",
-            timeAgo: "1 week ago",
-        },
-    ],
-    recentComments: [
-        {
-            id: "1",
-            ideaTitle: "Add More Healthy Food Options",
-            content: "Great idea! I'd love to see more vegetarian options too.",
-            timeAgo: "3 hours ago",
-        },
-        {
-            id: "2",
-            ideaTitle: "Upgrade Computer Lab Equipment",
-            content: "We definitely need better computers for coding classes.",
-            timeAgo: "1 day ago",
-        },
-    ],
-};
-
 export default function Home() {
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -244,7 +203,33 @@ export default function Home() {
             <ProfileModal
                 isOpen={showProfile}
                 onClose={() => setShowProfile(false)}
-                profile={mockProfile}
+                profile={user ? {
+                    name: user.name,
+                    username: user.username,
+                    joinDate: user.joinDate,
+                    totalIdeas: studentIdeas.length,
+                    totalVotes: 0,
+                    totalComments: 0,
+                    reputation: 0,
+                    recentIdeas: studentIdeas.slice(0, 2).map(idea => ({
+                        id: idea.id,
+                        title: idea.title,
+                        votes: idea.votes || 0,
+                        category: idea.category,
+                        timeAgo: 'recently',
+                    })),
+                    recentComments: [],
+                } : {
+                    name: '',
+                    username: '',
+                    joinDate: '',
+                    totalIdeas: 0,
+                    totalVotes: 0,
+                    totalComments: 0,
+                    reputation: 0,
+                    recentIdeas: [],
+                    recentComments: [],
+                }}
             />
 
             <ChatModal

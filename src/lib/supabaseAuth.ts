@@ -103,6 +103,45 @@ class SupabaseAuthService {
     return { user, token: authData.session?.access_token || '' };
   }
 
+  // OAuth sign-in (for login page)
+  async signInWithOAuth(provider: 'github' | 'spotify' | 'google' | 'discord' | 'apple'): Promise<void> {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  // Link OAuth provider to existing account
+  async linkOAuthProvider(provider: 'github' | 'spotify' | 'google' | 'discord' | 'apple'): Promise<void> {
+    const { error } = await supabase.auth.linkIdentity({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  // Unlink OAuth provider from existing account
+  async unlinkOAuthProvider(provider: string): Promise<void> {
+    const { error } = await supabase.auth.unlinkIdentity({
+      provider,
+    });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
+
   async getCurrentUser(): Promise<User | null> {
     const { data: { user: authUser }, error } = await supabase.auth.getUser();
 

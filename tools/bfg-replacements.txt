@@ -1,0 +1,10 @@
+# BFG / git-filter-repo replacements file
+# Format for --replace-text: each line is either a literal secret or a 'regex==>replacement'
+
+# Entferne Supabase Projekt-ID
+oweczikfqvbtoebjaowo==>REMOVED_SUPABASE_PROJECT_ID
+
+# Beispiel für Anon-Key (ersetze die Regex an deine reale Form)
+public-[A-Za-z0-9_-]+==>REMOVED_SUPABASE_ANON_KEY
+
+# Zusätzliche Muster: füge hier weitere Secrets ein, ein pro Zeile
