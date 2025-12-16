@@ -21,7 +21,7 @@ export function useNearbyDiscovery(userId?: string) {
   const [error, setError] = useState<string | null>(null);
   const discoveredDevices = useRef<Map<string, NearbyUser>>(new Map());
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const characteristicRef = useRef<BluetoothRemoteGATTCharacteristic | null>(null);
+  const characteristicRef = useRef<any>(null);
 
   /**
    * Startet das Scannen nach Bluetooth Geräten in der Nähe
@@ -36,7 +36,7 @@ export function useNearbyDiscovery(userId?: string) {
 
     try {
       // Check if Bluetooth Web API is available
-      if (!navigator.bluetooth) {
+      if (!(navigator as any).bluetooth) {
         throw new Error(
           'Bluetooth Web API nicht verfügbar. Bitte nutze Chrome/Edge auf Android.'
         );
@@ -46,7 +46,7 @@ export function useNearbyDiscovery(userId?: string) {
       discoveredDevices.current.clear();
 
       // Versuche, alle Bluetooth-Geräte zu finden
-      const device = await navigator.bluetooth.requestDevice({
+      const device = await (navigator as any).bluetooth.requestDevice({
         filters: [{ services: [NEARBY_SERVICE_UUID] }],
         optionalServices: [NEARBY_SERVICE_UUID],
       });
@@ -57,7 +57,7 @@ export function useNearbyDiscovery(userId?: string) {
       }
 
       // Verbinde zum Gerät
-      const server = await device.gatt?.connect();
+      const server = await (device as any).gatt?.connect();
       const service = await server?.getPrimaryService(NEARBY_SERVICE_UUID);
       const characteristic = await service?.getCharacteristic(
         NEARBY_CHARACTERISTIC_UUID
@@ -114,14 +114,14 @@ export function useNearbyDiscovery(userId?: string) {
 
     try {
       // Fetch user profile
-      const { data: user } = await supabase.auth.getUser();
+      const { data: { user: authUser } } = await supabase.auth.getUser();
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name, username')
         .eq('id', userId)
         .single();
 
-      if (!user?.id || !profile) {
+      if (!authUser?.id || !profile) {
         throw new Error('Benutzerprofil nicht gefunden');
       }
 
@@ -174,7 +174,7 @@ export function useNearbyDiscovery(userId?: string) {
   const quickAddFriend = useCallback(
     async (remoteUserId: string) => {
       try {
-        const { data, error: err } = await supabase
+        const { error: err } = await supabase
           .from('friends')
           .insert({
             user_id: userId,
@@ -182,8 +182,8 @@ export function useNearbyDiscovery(userId?: string) {
             status: 'accepted', // Auto-accept für Nearby
             created_at: new Date().toISOString(),
           })
-          .select()
-          .single();
+            .select()
+            .single();
 
         if (err) {
           if (err.message.includes('duplicate')) {

@@ -20,11 +20,11 @@ import { supabase } from '@/lib/supabaseClient';
 export default function Settings() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { saveSocialLink, removeSocialLink, loading: socialLoading, error: socialError } = useSocialLinks(user?.id);
+  const { saveSocialLink, removeSocialLink, error: socialError } = useSocialLinks(user?.id);
   const { pendingRequests, acceptFriendRequest, rejectFriendRequest } = useFriends(user?.id);
   const { updateProfile, loading: profileLoading, error: profileError } = useProfileEdit(user?.id);
   const { changeEmail, loading: emailLoading, error: emailError, verificationSent, resetState: resetEmailState } = useEmailChange();
-  const { linkedIdentities, loading: linkedLoading, isProviderLinked, linkProvider, unlinkProvider } = useLinkedIdentities(user?.id);
+  const { loading: linkedLoading, isProviderLinked, linkProvider, unlinkProvider } = useLinkedIdentities(user?.id);
 
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');

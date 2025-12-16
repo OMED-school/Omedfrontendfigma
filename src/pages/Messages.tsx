@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useMessages } from '@/hooks/useMessages';
+import { useChatUsers } from '@/hooks/useMessages';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
+// Card not used here; removing import to fix lint error
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { ArrowLeft, Send, Loader2 } from 'lucide-react';
@@ -32,7 +32,7 @@ interface Message {
 export default function Messages() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { fetchConversations, sendMessage, markAsRead } = useMessages(user?.id || '');
+  const { fetchConversations, sendMessage, markAsRead } = useChatUsers(user?.id || '');
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);

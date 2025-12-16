@@ -10,7 +10,18 @@ Usage examples (Vercel): put this file under `api/` in a Vercel project or wire 
 an Express server. This is a minimal example to demonstrate using the service role key.
 */
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+// Minimal type shims to avoid importing '@vercel/node' in this workspace
+type VercelRequest = {
+  method?: string;
+  url?: string | null;
+  headers: Record<string, string | string[] | undefined>;
+  body?: any;
+};
+
+type VercelResponse = {
+  status: (code: number) => VercelResponse;
+  json: (body: any) => void;
+};
 import { createClient } from '@supabase/supabase-js';
 
 // Helper to get env vars in different runtimes
