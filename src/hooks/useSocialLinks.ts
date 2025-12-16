@@ -21,7 +21,7 @@ export function useSocialLinks(userId: string | undefined) {
     
     try {
       // Check if Instagram profile exists (basic validation via URL check)
-      const response = await fetch(`https://www.instagram.com/${handle}/?__a=1`, {
+      await fetch(`https://www.instagram.com/${handle}/?__a=1`, {
         method: 'HEAD',
         mode: 'no-cors',
       });
@@ -40,7 +40,7 @@ export function useSocialLinks(userId: string | undefined) {
     }
     
     try {
-      const response = await fetch(`https://www.tiktok.com/@${handle}`, {
+      await fetch(`https://www.tiktok.com/@${handle}`, {
         method: 'HEAD',
         mode: 'no-cors',
       });

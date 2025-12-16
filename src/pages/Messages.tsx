@@ -32,7 +32,7 @@ interface Message {
 export default function Messages() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { fetchConversations, sendMessage, markAsRead } = useMessages(user?.id);
+  const { fetchConversations, sendMessage, markAsRead } = useMessages(user?.id || '');
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
