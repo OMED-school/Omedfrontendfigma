@@ -17,6 +17,7 @@ interface DetailedThreadViewProps {
   onVote: (ideaId: string, voteType: 'up' | 'down') => void;
   onAddComment: (content: string) => void;
   onVoteComment: (commentId: string, voteType: 'up' | 'down') => void;
+  currentUser?: { id: string; name?: string; username?: string; email?: string };
 }
 
 function CommentItem({ 
@@ -157,7 +158,8 @@ export function DetailedThreadView({
   onBack, 
   onVote,
   onAddComment,
-  onVoteComment 
+  onVoteComment,
+  currentUser 
 }: DetailedThreadViewProps) {
   const [currentVote, setCurrentVote] = useState(idea.userVote);
   const [voteCount, setVoteCount] = useState(idea.votes);
@@ -187,6 +189,29 @@ export function DetailedThreadView({
     if (newComment.trim()) {
       onAddComment(newComment.trim());
       setNewComment("");
+    }
+  };
+
+  const handleShare = async () => {
+    const shareText = `Check out this idea: "${idea.title}" - ${idea.description}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: idea.title,
+          text: shareText,
+        });
+      } catch (error) {
+        console.error('Share failed:', error);
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(shareText);
+        alert('Idea copied to clipboard!');
+      } catch (error) {
+        console.error('Copy to clipboard failed:', error);
+      }
     }
   };
 
@@ -264,7 +289,7 @@ export function DetailedThreadView({
                   <MessageCircle className="h-4 w-4" />
                   {idea.commentCount} {idea.commentCount === 1 ? 'comment' : 'comments'}
                 </Button>
-                <Button variant="ghost" size="sm" className="gap-1">
+                <Button variant="ghost" size="sm" className="gap-1" onClick={handleShare}>
                   <Share className="h-4 w-4" />
                   Share
                 </Button>
@@ -278,7 +303,7 @@ export function DetailedThreadView({
       <Card>
         <CardContent className="p-4">
           <form onSubmit={handleSubmitComment} className="space-y-3">
-            <p className="text-sm font-medium">Comment as John Student</p>
+            <p className="text-sm font-medium">Comment as {currentUser?.name || currentUser?.username || 'User'}</p>
             <Textarea
               placeholder="What are your thoughts?"
               value={newComment}

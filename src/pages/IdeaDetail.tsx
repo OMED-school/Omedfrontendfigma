@@ -86,6 +86,7 @@ export default function IdeaDetail() {
                     onVote={handleVote}
                     onAddComment={handleAddComment}
                     onVoteComment={handleVoteComment}
+                    currentUser={user}
                 />
             </main>
         </div>
