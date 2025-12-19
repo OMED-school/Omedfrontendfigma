@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Overview - OMED Documentation</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/doc-page.css">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-brand">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg>
+                <span class="logo-text">OMED Documentation</span>
+            </a>
+            <a href="index.html" class="btn btn-secondary btn-sm">← Back to Home</a>
+        </div>
+    </nav>
+
+    <main class="doc-container">
+        <div class="container">
+            <article class="doc-content">
+                <h1>🏗️ Architecture Overview</h1>
+                
+                <p>OMED follows a modern, component-based architecture with clear separation of concerns. This document outlines the system design, structure, and key architectural decisions.</p>
+
+                <h2>High-Level Architecture</h2>
+                <p>The application follows a three-tier architecture:</p>
+                
+                <div class="architecture-diagram">
+                    <div class="arch-layer">
+                        <h4>Presentation Layer (Frontend)</h4>
+                        <p>React components, pages, routing, and user interface</p>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="arch-layer">
+                        <h4>Application Layer (State & Logic)</h4>
+                        <p>React hooks, context providers, business logic</p>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="arch-layer">
+                        <h4>Data Layer (Backend)</h4>
+                        <p>Supabase client, API calls, real-time subscriptions</p>
+                    </div>
+                    <div class="arch-arrow">↓</div>
+                    <div class="arch-layer">
+                        <h4>Infrastructure Layer</h4>
+                        <p>Supabase (PostgreSQL, Auth, Storage, Realtime)</p>
+                    </div>
+                </div>
+
+                <h2>Directory Structure</h2>
+                <div class="code-block"><code>src/
+├── components/          # Reusable UI components
+│   ├── ui/             # Shadcn/UI components (Button, Dialog, etc.)
+│   ├── ChatModal.tsx   # Chat interface
+│   ├── IdeaCard.tsx    # Idea display component
+│   └── ...
+├── pages/              # Page components (route targets)
+│   ├── Home.tsx        # Student dashboard
+│   ├── TeacherDashboard.tsx
+│   ├── PrincipalDashboard.tsx
+│   ├── Login.tsx
+│   └── ...
+├── contexts/           # React Context providers
+│   └── AuthContext.tsx # Authentication state
+├── hooks/              # Custom React hooks
+│   ├── useIdeas.ts     # Fetch and subscribe to ideas
+│   ├── useVote.ts      # Voting functionality
+│   ├── useComments.ts  # Comments management
+│   └── ...
+├── lib/                # Core utilities and services
+│   ├── supabaseClient.ts # Supabase initialization
+│   ├── supabaseAuth.ts   # Auth service
+│   └── types.ts          # TypeScript type definitions
+├── utils/              # Helper functions
+├── styles/             # Global styles
+└── App.tsx             # Root component with routing</code></div>
+
+                <h2>Component Architecture</h2>
+                
+                <h3>Presentation Components</h3>
+                <p>Located in <code>src/components/</code>, these are reusable UI components that focus on presentation. They receive data and callbacks via props and don't manage their own state or data fetching.</p>
+                
+                <h3>Page Components</h3>
+                <p>Located in <code>src/pages/</code>, page components are route targets that compose multiple presentation components. They use hooks to fetch data and manage local state.</p>
+
+                <h3>UI Primitives</h3>
+                <p>Located in <code>src/components/ui/</code>, these are low-level components from Shadcn/UI built on Radix UI primitives. Examples: Button, Dialog, Select, Tabs.</p>
+
+                <h2>State Management</h2>
+                
+                <h3>Authentication State</h3>
+                <p>Managed via <code>AuthContext</code> which provides:</p>
+                <ul>
+                    <li><code>user</code> - Current authenticated user</li>
+                    <li><code>loading</code> - Authentication loading state</li>
+                    <li><code>login()</code> - Login function</li>
+                    <li><code>logout()</code> - Logout function</li>
+                    <li><code>signup()</code> - Registration function</li>
+                </ul>
+
+                <h3>Server State (Data from Backend)</h3>
+                <p>Managed via custom hooks that interact with Supabase:</p>
+                <ul>
+                    <li><code>useIdeas()</code> - Fetches ideas with real-time updates</li>
+                    <li><code>useComments(ideaId)</code> - Fetches comments for an idea</li>
+                    <li><code>useMessages(userId, recipientId)</code> - Chat messages</li>
+                    <li><code>useVote()</code> - Voting functionality</li>
+                </ul>
+
+                <h3>Local UI State</h3>
+                <p>Managed with React's <code>useState</code> and <code>useReducer</code> within individual components for modal visibility, form inputs, etc.</p>
+
+                <h2>Data Flow</h2>
+                
+                <h3>Reading Data</h3>
+                <ol>
+                    <li>Page component mounts and calls custom hook (e.g., <code>useIdeas()</code>)</li>
+                    <li>Hook queries Supabase database</li>
+                    <li>Hook sets up real-time subscription for updates</li>
+                    <li>Data is returned to component and rendered</li>
+                    <li>When database changes, subscription triggers automatic re-render</li>
+                </ol>
+
+                <h3>Writing Data</h3>
+                <ol>
+                    <li>User interacts with UI (e.g., submits a form)</li>
+                    <li>Event handler calls mutation function from hook</li>
+                    <li>Hook sends INSERT/UPDATE/DELETE to Supabase</li>
+                    <li>Database triggers update row counts and relationships</li>
+                    <li>Real-time subscription notifies all connected clients</li>
+                    <li>UI automatically updates with new data</li>
+                </ol>
+
+                <h2>Backend Architecture</h2>
+                
+                <h3>Database Schema</h3>
+                <p>PostgreSQL database with the following main tables:</p>
+                <ul>
+                    <li><code>users</code> - User profiles with roles</li>
+                    <li><code>ideas</code> - Student idea submissions</li>
+                    <li><code>votes</code> - Upvotes and downvotes on ideas</li>
+                    <li><code>comments</code> - Nested comments on ideas</li>
+                    <li><code>messages</code> - Chat messages between users</li>
+                    <li><code>teacher_review_ideas</code> - Ideas under teacher review</li>
+                    <li><code>principal_review_ideas</code> - Ideas approved by teachers</li>
+                </ul>
+
+                <h3>Row Level Security (RLS)</h3>
+                <p>Supabase RLS policies enforce access control at the database level:</p>
+                <ul>
+                    <li>Students can create ideas and vote</li>
+                    <li>Teachers can review and approve student ideas</li>
+                    <li>Principals can make final approvals with budget</li>
+                    <li>Users can only edit their own content</li>
+                    <li>Private messages are only visible to sender/recipient</li>
+                </ul>
+
+                <h3>Database Triggers</h3>
+                <p>PostgreSQL triggers automatically maintain data integrity:</p>
+                <ul>
+                    <li>Update vote counts when votes are added/removed</li>
+                    <li>Update comment counts on ideas</li>
+                    <li>Set timestamps on creation and updates</li>
+                </ul>
+
+                <h3>Real-time Subscriptions</h3>
+                <p>Supabase Realtime enables instant updates across all connected clients:</p>
+                <ul>
+                    <li>New ideas appear immediately for all users</li>
+                    <li>Vote counts update in real-time</li>
+                    <li>Chat messages delivered instantly</li>
+                    <li>Status changes propagate to all viewers</li>
+                </ul>
+
+                <h2>Authentication Flow</h2>
+                <ol>
+                    <li>User submits login credentials</li>
+                    <li>Supabase Auth validates email/password</li>
+                    <li>On success, returns JWT access token and refresh token</li>
+                    <li>Tokens stored in localStorage</li>
+                    <li>Access token included in all API requests</li>
+                    <li>AuthContext provides user info to all components</li>
+                </ol>
+
+                <h2>Routing Architecture</h2>
+                <p>React Router v6 handles client-side routing:</p>
+                <ul>
+                    <li><code>/</code> - Home/Student Dashboard</li>
+                    <li><code>/login</code> - Login page</li>
+                    <li><code>/signup</code> - Registration page</li>
+                    <li><code>/teacher</code> - Teacher dashboard (protected)</li>
+                    <li><code>/principal</code> - Principal dashboard (protected)</li>
+                    <li><code>/profile</code> - User profile (protected)</li>
+                </ul>
+
+                <h3>Protected Routes</h3>
+                <p>A <code>ProtectedRoute</code> component wraps routes that require authentication:</p>
+                <div class="code-block"><code>&lt;Route
+  path="/teacher"
+  element={
+    &lt;ProtectedRoute requiredRole="teacher"&gt;
+      &lt;TeacherDashboard /&gt;
+    &lt;/ProtectedRoute&gt;
+  }
+/&gt;</code></div>
+
+                <h2>Styling Architecture</h2>
+                
+                <h3>Tailwind CSS</h3>
+                <p>Utility-first CSS framework for rapid UI development. Configuration in <code>tailwind.config.js</code>.</p>
+
+                <h3>CSS Modules</h3>
+                <p>Component-specific styles when needed, scoped to avoid conflicts.</p>
+
+                <h3>Design Tokens</h3>
+                <p>Consistent colors, spacing, and typography defined in Tailwind config and used throughout the app.</p>
+
+                <h2>Build & Deployment Architecture</h2>
+                
+                <h3>Development</h3>
+                <ul>
+                    <li>Vite dev server with HMR (Hot Module Replacement)</li>
+                    <li>Fast rebuilds and instant updates</li>
+                    <li>Source maps for debugging</li>
+                </ul>
+
+                <h3>Production Build</h3>
+                <ul>
+                    <li>Vite builds optimized static files</li>
+                    <li>Code splitting for smaller bundles</li>
+                    <li>Tree shaking removes unused code</li>
+                    <li>Minification and compression</li>
+                    <li>Output in <code>/build</code> directory</li>
+                </ul>
+
+                <h3>Deployment Options</h3>
+                <ul>
+                    <li><strong>Web:</strong> Static hosting (Vercel, Netlify, GitHub Pages)</li>
+                    <li><strong>iOS:</strong> Capacitor wraps web app for App Store</li>
+                    <li><strong>Android:</strong> Capacitor creates APK for Play Store</li>
+                </ul>
+
+                <h2>Performance Considerations</h2>
+                
+                <h3>Code Splitting</h3>
+                <p>React.lazy() and dynamic imports split code by route:</p>
+                <div class="code-block"><code>const TeacherDashboard = React.lazy(
+  () => import('./pages/TeacherDashboard')
+);</code></div>
+
+                <h3>Memoization</h3>
+                <p>React.memo() prevents unnecessary re-renders of expensive components.</p>
+
+                <h3>Optimistic Updates</h3>
+                <p>UI updates immediately before server confirms, then reverts if needed.</p>
+
+                <h3>Real-time Subscription Management</h3>
+                <p>Hooks clean up subscriptions on unmount to prevent memory leaks.</p>
+
+                <h2>Security Architecture</h2>
+                
+                <h3>Authentication</h3>
+                <ul>
+                    <li>JWT tokens for stateless auth</li>
+                    <li>Secure token storage</li>
+                    <li>Automatic token refresh</li>
+                </ul>
+
+                <h3>Authorization</h3>
+                <ul>
+                    <li>Row Level Security at database level</li>
+                    <li>Role-based access control in UI</li>
+                    <li>Protected routes requiring specific roles</li>
+                </ul>
+
+                <h3>Data Validation</h3>
+                <ul>
+                    <li>Client-side validation for better UX</li>
+                    <li>Server-side validation via RLS policies</li>
+                    <li>TypeScript for type safety</li>
+                </ul>
+
+                <h2>Testing Strategy</h2>
+                <p>(Recommended - not yet implemented)</p>
+                <ul>
+                    <li><strong>Unit Tests:</strong> Test individual functions and hooks</li>
+                    <li><strong>Component Tests:</strong> Test UI components in isolation</li>
+                    <li><strong>Integration Tests:</strong> Test data flow and user interactions</li>
+                    <li><strong>E2E Tests:</strong> Test full user workflows</li>
+                </ul>
+
+                <h2>Scalability Considerations</h2>
+                
+                <h3>Frontend Scalability</h3>
+                <ul>
+                    <li>Static site can be served from CDN</li>
+                    <li>No server-side rendering needed</li>
+                    <li>Code splitting reduces initial load</li>
+                </ul>
+
+                <h3>Backend Scalability</h3>
+                <ul>
+                    <li>Supabase handles horizontal scaling</li>
+                    <li>PostgreSQL connection pooling</li>
+                    <li>Database indexes for query performance</li>
+                    <li>Realtime uses WebSocket connections</li>
+                </ul>
+
+                <h3>Future Improvements</h3>
+                <ul>
+                    <li>Implement pagination for large data sets</li>
+                    <li>Add caching layer (Redis) for frequently accessed data</li>
+                    <li>Implement search with full-text indexes</li>
+                    <li>Add analytics and monitoring</li>
+                </ul>
+
+                <h2>Mobile Architecture (Capacitor)</h2>
+                <p>Capacitor wraps the web app in a native container:</p>
+                <ul>
+                    <li>WebView renders React app</li>
+                    <li>Capacitor plugins provide native APIs</li>
+                    <li>Same codebase for web, iOS, and Android</li>
+                    <li>Platform-specific builds in <code>/ios</code> and <code>/android</code></li>
+                </ul>
+
+                <h2>Key Architectural Decisions</h2>
+                
+                <h3>Why React?</h3>
+                <p>Component-based architecture, large ecosystem, great for interactive UIs, TypeScript support.</p>
+
+                <h3>Why Supabase?</h3>
+                <p>Fast setup, real-time out of the box, built on PostgreSQL, generous free tier, great developer experience.</p>
+
+                <h3>Why Vite?</h3>
+                <p>Fast dev server, optimized builds, modern ESM-based tooling, better than Create React App.</p>
+
+                <h3>Why Tailwind CSS?</h3>
+                <p>Rapid development, consistent design, small production bundle, utility-first approach.</p>
+
+                <h3>Why Capacitor?</h3>
+                <p>Web-first approach, easier than React Native, leverage existing web skills, one codebase for all platforms.</p>
+
+                <h2>Conclusion</h2>
+                <p>OMED's architecture prioritizes developer experience, scalability, and maintainability. The clear separation of concerns, type safety with TypeScript, and real-time capabilities make it a robust platform for school idea management.</p>
+            </article>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2024 OMED School Platform. <a href="index.html">Back to Documentation Home</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

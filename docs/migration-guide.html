@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration Guide - OMED Documentation</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/doc-page.css">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-brand">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg>
+                <span class="logo-text">OMED Documentation</span>
+            </a>
+            <a href="index.html" class="btn btn-secondary btn-sm">← Back to Home</a>
+        </div>
+    </nav>
+
+    <main class="doc-container">
+        <div class="container">
+            <article class="doc-content">
+                <h1>Migration from Mock Data to Supabase</h1><p>This document describes the changes made to migrate from mock data to Supabase backend.</p><h2>Overview</h2><p>The application has been fully migrated from using local mock data to a real Supabase backend. This provides:
+<ul>
+<li><strong>Real-time updates</strong> - Changes appear instantly across all users</li>
+<li><strong>Persistent storage</strong> - Data is saved in a PostgreSQL database</li>
+<li><strong>Secure authentication</strong> - User accounts with role-based access</li>
+<li><strong>Scalability</strong> - Can handle many concurrent users</li>
+<li><strong>Production-ready</strong> - Enterprise-grade backend infrastructure</li>
+</ul><h2>What Changed</h2><h3>Removed Files</h3>
+<ul>
+<li>❌ <code>src/lib/mockBackend.ts</code> - Mock authentication and data storage</li>
+</ul><h3>New Files</h3><h4>Core Infrastructure</h4>
+<ul>
+<li>✅ <code>src/lib/supabaseClient.ts</code> - Supabase client initialization</li>
+<li>✅ <code>src/lib/types.ts</code> - TypeScript types matching database schema</li>
+<li>✅ <code>src/lib/supabaseAuth.ts</code> - Authentication service using Supabase Auth</li>
+</ul><h4>React Hooks</h4>
+<ul>
+<li>✅ <code>src/hooks/useIdeas.ts</code> - Fetch ideas with real-time updates</li>
+<li>✅ <code>src/hooks/useVote.ts</code> - Vote on ideas</li>
+<li>✅ <code>src/hooks/useIdeaActions.ts</code> - Create and update ideas</li>
+<li>✅ <code>src/hooks/useComments.ts</code> - Comments with nested replies</li>
+<li>✅ <code>src/hooks/useMessages.ts</code> - Chat and messaging</li>
+</ul><h4>Documentation</h4>
+<ul>
+<li>✅ <code>SUPABASE_SETUP.md</code> - Complete setup guide</li>
+<li>✅ <code>MIGRATION_GUIDE.md</code> - This file</li>
+</ul><h3>Modified Files</h3><h4><code>package.json</code></h4>
+Changed from JSR registry package to standard npm package:
+``<code>diff
+<ul>
+<li>"@jsr/supabase<em></em>supabase-js": "^2.49.8"</li>
+<li>"@supabase/supabase-js": "^2.49.8"</li>
+</ul>
+</code>`<code></p><h4></code>src/contexts/AuthContext.tsx<code></h4>
+Updated to use Supabase authentication instead of mock backend:
+</code>`<code>diff
+<ul>
+<li>import { mockBackend, type User } from '../lib/mockBackend';</li>
+<li>import { authService, type User } from '../lib/supabaseAuth';</li>
+</ul>
+</code>`<code></p><h4></code>src/App.tsx<code></h4>
+Major refactor to use Supabase hooks instead of local state:
+<ul>
+<li>Removed all mock data arrays (mockIdeas, mockTeacherIdeas, mockPrincipalIdeas)</li>
+<li>Replaced </code>useState<code> with Supabase hooks (</code>useIdeas<code>, </code>useTeacherIdeas<code>, </code>usePrincipalIdeas<code>)</li>
+<li>Updated all handlers to use async Supabase operations</li>
+<li>Added real-time data updates via subscriptions</li>
+</ul><h4></code>src/components/ChatModal.tsx<code></h4>
+Updated to use real chat data:
+<ul>
+<li>Removed mock users and messages</li>
+<li>Integrated </code>useChatUsers<code> and </code>useMessages<code> hooks</li>
+<li>Added real-time message synchronization</li>
+</ul><h2>Key Differences in Behavior</h2><h3>Before (Mock Data)</h3>
+<ul>
+<li>Data was stored in browser memory</li>
+<li>Data was lost on page refresh</li>
+<li>Each user saw their own local data</li>
+<li>No user accounts - role switching was just a UI toggle</li>
+<li>Instant operations (no network delay)</li>
+</ul><h3>After (Supabase)</h3>
+<ul>
+<li>Data is stored in PostgreSQL database</li>
+<li>Data persists across sessions</li>
+<li>All users see the same data in real-time</li>
+<li>Real user authentication with different accounts</li>
+<li>Operations may have slight network delay</li>
+<li>Requires internet connection</li>
+</ul><h2>Migration Steps for Developers</h2><p>If you were working with the previous mock data version:</p><h3>1. Update Dependencies</h3>
+</code>`<code>bash
+npm install
+</code>`<code></p><h3>2. Set Up Supabase</h3>
+Follow the complete guide in </code>SUPABASE_SETUP.md<code>:
+1. Create a Supabase project
+2. Run database schema SQL
+3. Set up Row Level Security policies
+4. Create database triggers
+5. Configure authentication
+6. Update project credentials in </code>src/utils/supabase/info.tsx<code></p><h3>3. Create Test Data</h3>
+Since the database starts empty, you'll need to:
+1. Sign up test users through the app
+2. Manually set user roles in Supabase dashboard
+3. Create some test ideas and comments</p><h3>4. Test All Features</h3>
+<ul>
+<li>✅ User signup and login</li>
+<li>✅ Creating ideas</li>
+<li>✅ Voting on ideas</li>
+<li>✅ Commenting on ideas</li>
+<li>✅ Teacher review workflow</li>
+<li>✅ Principal approval workflow</li>
+<li>✅ Chat messaging</li>
+</ul><h2>Code Changes for Custom Features</h2><h3>Adding a New Field to Ideas</h3><p><strong>Before (Mock):</strong>
+Just add the field to the mock data array.</p><p><strong>After (Supabase):</strong>
+1. Add column to database:
+</code>`<code>sql
+ALTER TABLE ideas ADD COLUMN new_field TEXT;
+</code>`<code></p><p>2. Update TypeScript types in </code>src/lib/types.ts<code>:
+</code>`<code>typescript
+export interface IdeaRow {
+  // ... existing fields
+  new_field: string | null;
+}
+</code>`<code></p><p>3. Update hook in </code>src/hooks/useIdeas.ts<code> to include the new field</p><h3>Adding a New Feature</h3><p><strong>Before (Mock):</strong>
+Add handler function and update local state.</p><p><strong>After (Supabase):</strong>
+1. Design database schema
+2. Add table/columns
+3. Set up RLS policies
+4. Create TypeScript types
+5. Create React hook
+6. Use hook in components</p><h2>API Differences</h2><h3>Authentication</h3><p><strong>Before:</strong>
+</code>`<code>typescript
+// Mock - accepted any password
+await mockBackend.login(email, password);
+</code>`<code></p><p><strong>After:</strong>
+</code>`<code>typescript
+// Supabase - validates credentials
+await authService.login(email, password);
+</code>`<code></p><h3>Creating an Idea</h3><p><strong>Before:</strong>
+</code>`<code>typescript
+// Local state update
+setIdeas([newIdea, ...ideas]);
+</code>`<code></p><p><strong>After:</strong>
+</code>`<code>typescript
+// Database insert
+await createIdea({
+  title, description, category, authorId
+});
+// Hook automatically updates via real-time subscription
+</code>`<code></p><h3>Voting</h3><p><strong>Before:</strong>
+</code>`<code>typescript
+// Update local array
+setIdeas(ideas.map(idea => 
+  idea.id === ideaId ? { ...idea, votes: newVotes } : idea
+));
+</code>`<code></p><p><strong>After:</strong>
+</code>`<code>typescript
+// Database transaction
+await vote(ideaId, userId, voteType);
+// Hook automatically updates via trigger + subscription
+</code>`<code></p><h2>Real-Time Features</h2><p>One of the major benefits of Supabase is real-time updates:</p><h3>Ideas List</h3>
+</code>`<code>typescript
+// Automatically subscribes to changes
+const { ideas } = useIdeas(user?.id);</p><p>// When any user creates/updates an idea, all users see it instantly
+</code>`<code></p><h3>Comments</h3>
+</code>`<code>typescript
+// Real-time comment updates
+const { comments } = useComments(ideaId, user?.id);</p><p>// New comments appear immediately for all users
+</code>`<code></p><h3>Chat Messages</h3>
+</code>`<code>typescript
+// Real-time messaging
+const { messages } = useMessages(currentUserId, recipientId);</p><p>// Messages appear instantly in both users' chats
+</code>`<code></p><h2>Error Handling</h2><h3>Before (Mock)</h3>
+Errors were simulated or didn't exist.</p><h3>After (Supabase)</h3>
+Real errors can occur:
+<ul>
+<li>Network errors</li>
+<li>Permission errors (RLS)</li>
+<li>Validation errors</li>
+<li>Database errors</li>
+</ul><p>All hooks and functions now include proper error handling:
+</code>`<code>typescript
+try {
+  await createIdea(data);
+} catch (error) {
+  console.error('Error creating idea:', error);
+  alert('Failed to create idea');
+}
+</code>`<code></p><h2>Performance Considerations</h2><h3>Database Queries</h3>
+<ul>
+<li>Hooks use </code>.select()<code> with joins to minimize queries</li>
+<li>Results are cached in component state</li>
+<li>Real-time subscriptions only update when data changes</li>
+</ul><h3>Pagination</h3>
+Currently fetches all ideas. For large datasets, consider:
+</code>`<code>typescript
+const { data } = await supabase
+  .from('ideas')
+  .select('*')
+  .range(0, 50) // Limit to 50 items
+  .order('created_at', { ascending: false });
+</code>`<code></p><h2>Testing</h2><h3>Unit Testing</h3>
+Mock Supabase in tests:
+</code>`<code>typescript
+jest.mock('../lib/supabaseClient', () => ({
+  supabase: {
+    from: jest.fn(),
+    auth: jest.fn(),
+  }
+}));
+</code>`<code></p><h3>Integration Testing</h3>
+Use a test Supabase project with seeded data.</p><h2>Troubleshooting</h2><h3>"No rows returned" errors</h3>
+Check Row Level Security policies - they may be too restrictive.</p><h3>Real-time updates not working</h3>
+Ensure Realtime is enabled in Supabase dashboard for all tables.</p><h3>Authentication errors</h3>
+Verify credentials in </code>src/utils/supabase/info.tsx<code> match your project.</p><h3>Vote counts not updating</h3>
+Check that database triggers are installed correctly.</p><h2>Benefits of This Migration</h2><p>1. <strong>Production Ready</strong> - No more "this is just demo data" disclaimers
+2. <strong>Multi-User</strong> - Multiple people can use the app simultaneously
+3. <strong>Persistent</strong> - Data survives browser refresh and app restarts
+4. <strong>Real-time</strong> - Changes appear instantly for all users
+5. <strong>Secure</strong> - Row Level Security protects user data
+6. <strong>Scalable</strong> - Can handle growth from 10 to 10,000+ users
+7. <strong>Maintainable</strong> - Structured database schema with migrations
+8. <strong>Extensible</strong> - Easy to add new features with database backing</p><h2>Next Steps</h2><p>1. Read </code>SUPABASE_SETUP.md<code> for setup instructions
+2. Create your Supabase project
+3. Run the database migrations
+4. Test all features with real data
+5. Deploy to production!</p><h2>Support</h2><p>If you encounter issues during migration:
+1. Check </code>SUPABASE_SETUP.md` troubleshooting section
+2. Review Supabase logs in dashboard
+3. Check browser console for errors
+4. Verify database policies and triggers are installed</p><h2>Conclusion</h2><p>This migration transforms the app from a demo with fake data into a production-ready application with real backend infrastructure. While it requires initial setup, the benefits far outweigh the effort.</p><p>Welcome to the new Supabase-powered School Ideas Platform! 🚀
+</p>
+            </article>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2024 OMED School Platform. <a href="index.html">Back to Documentation Home</a></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
