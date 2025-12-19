@@ -15,7 +15,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 
 export default function App() {
   return (
-    <Router>
+    <Router basename="/Omedfrontendfigma">
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
